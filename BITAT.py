@@ -26,6 +26,7 @@ parser.add_argument('--custom_hit_hierarchy',default = None, help = 'linean taxa
 parser.add_argument('--custom_hit_id', default = None, help = 'tag in gene id that indicates the hit is from a custom database')
 parser.add_argument('--filtered_hit_table', help = 'comma-delimited diamond/blast output that has already undergone filtering to keep only one hit per window', default = None)
 parser.add_argument('--filtered_annotated_hit_table', help = 'comma-delimited diamond/blast out that has already undergone filtering and taxon annotation',default = None)
+parser.add_argument('--tig_table', help = 'comma-delimited table with taxon annotation, depth annotation, and GC content',default = None)
 parser.add_argument('--plot_max_depth', default = None, type = int, help = 'max depth for plot (integer; default = {max depth in data})')
 parser.add_argument('--plot_taxon_level',default = 'phyl', help = 'taxonomic at which plot points are colored. Options are \
                     "king","phyl","class", and "order" (default = "phyl")')
@@ -168,6 +169,7 @@ def add_depths(tig_table,coverage_file):
         fields = line.split()
         if len(fields) > 1:
             tig_table.at[fields[0],'Depth'] = float(fields[1])
+    tig_table.iloc[:,[0,1] + list(range(3,len(tig_table.columns)))].to_csv(out_prefix + '.final_tig_table.tab')
     return tig_table
 
 def plot(tig_table, taxa_level, max_depth,out_prefix):
@@ -194,10 +196,14 @@ def main():
     else:
         sys.stderr.write("reading filtered annotated hit table\n")
         blast_df = pd.read_csv(args.filtered_annotated_hit_table)
-    if args.genome_fasta:
+    if args.genome_fasta and not args.tig_table:
         rdf = build_tig_table(args.genome_fasta,args.out_prefix,blast_df)
-    if args.coverage_file:
+    if args.coverage_file and not args.tig_table:
         rdf = add_depths(rdf,args.coverage_file)
+        if 'Depth' in rdf.columns:
+            plot(rdf,args.plot_taxon_level,args.plot_max_depth,args.out_prefix)
+    if args.tig_table:
+        rdf = pd.read_csv(args.tig_table)
         plot(rdf,args.plot_taxon_level,args.plot_max_depth,args.out_prefix)
 
 if __name__ == "__main__":
