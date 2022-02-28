@@ -163,7 +163,7 @@ def build_tig_table(genome_fasta,out_prefix,blast_df):
     rdf.to_csv(out_prefix + '.annotated_tig_table.tab')
     return rdf
 
-def add_depths(tig_table,coverage_file):
+def add_depths(tig_table,coverage_file,out_prefix):
     tig_table["Depth"] = 0.0
     for line in open(coverage_file):
         fields = line.split()
@@ -199,7 +199,7 @@ def main():
     if args.genome_fasta and not args.tig_table:
         rdf = build_tig_table(args.genome_fasta,args.out_prefix,blast_df)
     if args.coverage_file and not args.tig_table:
-        rdf = add_depths(rdf,args.coverage_file)
+        rdf = add_depths(rdf,args.coverage_file,args.out_prefix)
         if 'Depth' in rdf.columns:
             plot(rdf,args.plot_taxon_level,args.plot_max_depth,args.out_prefix)
     if args.tig_table:
