@@ -169,7 +169,7 @@ def add_depths(tig_table,coverage_file,out_prefix):
         fields = line.split()
         if len(fields) > 1:
             tig_table.at[fields[0],'Depth'] = float(fields[1])
-    tig_table.iloc[:,[0,1] + list(range(3,len(tig_table.columns)))].to_csv(out_prefix + '.final_tig_table.tab')
+    tig_table.iloc[:,[0] + list(range(2,len(tig_table.columns)))].to_csv(out_prefix + '.final_tig_table.tab')
     return tig_table
 
 def plot(tig_table, taxa_level, max_depth,out_prefix):
